@@ -43,6 +43,9 @@ contract Crowdsale is Haltable, Ownable{
   // amount of raised money in wei
   uint256 public weiRaised;
 
+  // Total amount to be sold
+  uint256 public cap;
+
   // Has this crowdsale been finalized
   bool public finalized;
 
@@ -81,12 +84,14 @@ contract Crowdsale is Haltable, Ownable{
 
   event Finalized();
 
-  function Crowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, address _wallet, address _token) {
+  function Crowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, uint256 _cap, address _wallet, address _token) {
     require(_startTime >= now);
     require(_endTime >= _startTime);
     require(_rate > 0);
     require(_wallet != 0x0);
-
+    require(_cap > 0);
+    
+    cap = _cap;
     token = MatryxToken(_token);
     startTime = _startTime;
     endTime = _endTime;
@@ -195,19 +200,23 @@ contract Crowdsale is Haltable, Ownable{
 
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {
-    bool canPrePurchase = msg.value >= 1000 * 10**18 || whitelist[msg.sender] || earlyParticipantList[msg.sender];
-    return canPrePurchase;
+    bool canPrePurchase = msg.value >= 1000 * 10**18 
+    bool listed = whitelist[msg.sender]
+    bool early = earlyParticipantList[msg.sender];
+    return canPrePurchase && listed && early;
   }
 
   // @return true if the transaction can buy tokens
   function validPurchase() internal constant returns (bool) {
     bool withinPeriod = now >= startTime && now <= endTime;
-    return withinPeriod;
+    bool withinCap = weiRaised.add(msg.value) <= cap;
+    return withinPeriod && withinCap;
   }
 
   // @return true if crowdsale event has ended
   function hasEnded() public constant returns (bool) {
-    return now > endTime;
+    bool capReached = weiRaised >= cap;
+    return now > endTime && capReached;
   }
 
 
