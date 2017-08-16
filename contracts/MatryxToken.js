@@ -13,7 +13,7 @@ contract MatryxToken is MintableToken {
   uint public decimals;
   address public foundation;
 
-  function MatryxToken(address _owner, string _name, string _symbol, uint _totalSupply, uint _decimals)  UpgradeableToken(_owner) {
+  function MatryxToken(address _owner, string _name, string _symbol, uint _totalSupply, uint _decimals) {
     name = _name;
     symbol = _symbol;
     totalSupply = _totalSupply;
