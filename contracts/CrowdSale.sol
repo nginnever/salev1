@@ -15,36 +15,39 @@ import './ownership/Ownable.sol';
  *
  * This crowdsale contract is also based on the TokenMarket Crowdsale
  */
-contract Crowdsale is Haltable, Ownable{
+contract Crowdsale is Ownable, Haltable {
   using SafeMath for uint256;
 
   // The token being sold
+  //MatryxToken public token = MatryxToken(0x392985aEF88D4Ef849A6Ec230706B71609403F59);
   MatryxToken public token;
+  address public Mtoken;
 
   // start and end timestamps where investments are allowed (both inclusive)
-  uint256 public startTime;
-  uint256 public endTime;
+  uint256 public startTime = 420;
+  uint256 public endTime = 420;
 
   // address where funds are collected
+  //address public wallet = 0x0;
   address public wallet;
 
   // how many token units a buyer gets per wei
-  uint256 public rate;
+  uint256 public rate = 420;
 
   // how many token units a buyer gets per wei with tier 1 discount
-  uint256 public lowDiscountRate;
+  uint256 public lowDiscountRate = 420;
 
   // how many token units a buyer gets per wei with tier 2 discount
-  uint256 public highDiscountRate;
+  uint256 public highDiscountRate = 420;
 
   // how many token units a buyer gets per wei with tier 3 discount
-  uint256 public whitelistRate;
+  uint256 public whitelistRate = 420;
 
   // amount of raised money in wei
   uint256 public weiRaised;
 
   // Total amount to be sold
-  uint256 public cap;
+  uint256 public cap = 420;
 
   // Has this crowdsale been finalized
   bool public finalized;
@@ -61,7 +64,7 @@ contract Crowdsale is Haltable, Ownable{
   // How much tokens this crowdsale has credited for each investor address
   mapping (address => uint256) public tokenAmountOf;
 
-  // Addresses that have purchased before main sale offical opens.
+  // Addresses that have purchased tokens in the presale.
   mapping (address => bool) public earlyParticipantList;
 
   // Addresses of whitelisted presale investors.
@@ -84,18 +87,9 @@ contract Crowdsale is Haltable, Ownable{
 
   event Finalized();
 
-  function Crowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, uint256 _cap, address _wallet, address _token) {
-    require(_startTime >= now);
-    require(_endTime >= _startTime);
-    require(_rate > 0);
-    require(_wallet != 0x0);
-    require(_cap > 0);
-    
-    cap = _cap;
-    token = MatryxToken(_token);
-    startTime = _startTime;
-    endTime = _endTime;
-    rate = _rate;
+  function Crowdsale(address _token, address _wallet) {
+    //require(_token != 0x0);
+    Mtoken = _token;
     wallet = _wallet;
   }
 
@@ -120,19 +114,21 @@ contract Crowdsale is Haltable, Ownable{
 
   function buyPresale(address beneficiary) internal {
     uint256 weiAmount = msg.value;
+    uint256 tokens = 0;
 
     // calculate discount
     if(whitelist[msg.sender]) {
-      uint256 tokens = weiAmount.mul(whitelistRate);
+      tokens = weiAmount.mul(whitelistRate);
     } else if(weiAmount < 100 * 10**18) {
-      uint256 tokens = weiAmount.mul(lowDiscountRate);
+      tokens = weiAmount.mul(lowDiscountRate);
     } else {
-      uint256 tokens = weiAmount.mul(highDiscountRate);
+      tokens = weiAmount.mul(highDiscountRate);
     }
 
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
+    MatryxToken token = MatryxToken(Mtoken);
     token.mint(beneficiary, tokens);
 
     // update the early list so they may purchase smaller amounts
@@ -156,6 +152,7 @@ contract Crowdsale is Haltable, Ownable{
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
+    MatryxToken token = MatryxToken(Mtoken);
     token.mint(beneficiary, tokens);
 
     // update the early list so they may purchase smaller amounts
@@ -190,6 +187,7 @@ contract Crowdsale is Haltable, Ownable{
    * executed entirely.
    */
   function finalization() internal {
+
   }
 
   // send ether to the fund collection wallet
@@ -200,8 +198,8 @@ contract Crowdsale is Haltable, Ownable{
 
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {
-    bool canPrePurchase = msg.value >= 1000 * 10**18 
-    bool listed = whitelist[msg.sender]
+    bool canPrePurchase = msg.value >= 1000 * 10**18;
+    bool listed = whitelist[msg.sender];
     bool early = earlyParticipantList[msg.sender];
     return canPrePurchase && listed && early;
   }
