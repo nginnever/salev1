@@ -21,11 +21,10 @@ contract Crowdsale is Ownable, Haltable {
   // The token being sold
   //MatryxToken public token = MatryxToken(0x392985aEF88D4Ef849A6Ec230706B71609403F59);
   MatryxToken public token;
-  address public Mtoken;
 
   // start and end timestamps where investments are allowed (both inclusive)
-  uint256 public startTime = 420;
-  uint256 public endTime = 420;
+  uint256 public startTime;
+  uint256 public endTime;
 
   // address where funds are collected
   //address public wallet = 0x0;
@@ -87,10 +86,20 @@ contract Crowdsale is Ownable, Haltable {
 
   event Finalized();
 
-  function Crowdsale(address _token, address _wallet) {
+  function Crowdsale(uint256 _startTime, uint256 _endTime, address _token, address _wallet) {
     //require(_token != 0x0);
-    Mtoken = _token;
+    //require(_rate > 0);
+    //Mtoken = _token;
+    token = createTokenContract(_token);
     wallet = _wallet;
+    startTime = _startTime;
+    endTime = _endTime;
+  }
+
+  // creates the token to be sold. 
+  // override this method to have crowdsale of a specific mintable token.
+  function createTokenContract(address _token) internal returns (MatryxToken) {
+    return MatryxToken(_token);
   }
 
   // fallback function can be used to buy tokens
@@ -128,7 +137,6 @@ contract Crowdsale is Ownable, Haltable {
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
-    MatryxToken token = MatryxToken(Mtoken);
     token.mint(beneficiary, tokens);
 
     // update the early list so they may purchase smaller amounts
@@ -152,7 +160,6 @@ contract Crowdsale is Ownable, Haltable {
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
-    MatryxToken token = MatryxToken(Mtoken);
     token.mint(beneficiary, tokens);
 
     // update the early list so they may purchase smaller amounts
