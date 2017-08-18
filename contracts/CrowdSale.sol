@@ -31,22 +31,25 @@ contract Crowdsale is Ownable, Haltable {
   address public wallet;
 
   // how many token units a buyer gets per wei
-  uint256 public rate = 420;
+  uint256 public rate = 000000000000001164;
 
   // how many token units a buyer gets per wei with tier 1 discount
-  uint256 public lowDiscountRate = 420;
+  uint256 public lowDiscountRate = 000000000000002164;
 
   // how many token units a buyer gets per wei with tier 2 discount
-  uint256 public highDiscountRate = 420;
+  uint256 public highDiscountRate = 000000000000003164;
 
   // how many token units a buyer gets per wei with tier 3 discount
-  uint256 public whitelistRate = 420;
+  uint256 public whitelistRate = 000000000000004164;
 
   // amount of raised money in wei
   uint256 public weiRaised;
 
   // Total amount to be sold
-  uint256 public cap = 420;
+  uint256 public cap = 188338692;
+
+  // Total amount to be sold in the presale
+  uint256 public presaleCap = 94169346;
 
   // Has this crowdsale been finalized
   bool public finalized;
@@ -92,7 +95,7 @@ contract Crowdsale is Ownable, Haltable {
     if(_token != 0x0) throw;
     if(_startTime < now) throw;
     if(_endTime <= _startTime) throw;
-    
+
     token = createTokenContract(_token);
     wallet = _wallet;
     startTime = _startTime;
@@ -206,12 +209,18 @@ contract Crowdsale is Ownable, Haltable {
     wallet.transfer(msg.value);
   }
 
+  // Allow the owner to update the presale whitelist
+  function updateWhitelist(address _purchaser) onlyOwner {
+    whitelist[_purchaser] = true;
+  }
+
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {
     bool canPrePurchase = msg.value >= 50 * 10**18 || whitelist[msg.sender];
     //bool listed = whitelist[msg.sender];
     bool early = earlyParticipantList[msg.sender];
-    return canPrePurchase && early;
+    bool withinCap = weiRaised.add(msg.value) <= presaleCap;
+    return canPrePurchase && early && withinCap;
   }
 
   // @return true if the transaction can buy tokens
