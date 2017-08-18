@@ -89,7 +89,10 @@ contract Crowdsale is Ownable, Haltable {
   function Crowdsale(uint256 _startTime, uint256 _endTime, address _token, address _wallet) {
     //require(_token != 0x0);
     //require(_rate > 0);
-    //Mtoken = _token;
+    if(_token != 0x0) throw;
+    if(_startTime < now) throw;
+    if(_endTime <= _startTime) throw;
+    
     token = createTokenContract(_token);
     wallet = _wallet;
     startTime = _startTime;
@@ -205,10 +208,10 @@ contract Crowdsale is Ownable, Haltable {
 
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {
-    bool canPrePurchase = msg.value >= 1000 * 10**18;
-    bool listed = whitelist[msg.sender];
+    bool canPrePurchase = msg.value >= 50 * 10**18 || whitelist[msg.sender];
+    //bool listed = whitelist[msg.sender];
     bool early = earlyParticipantList[msg.sender];
-    return canPrePurchase && listed && early;
+    return canPrePurchase && early;
   }
 
   // @return true if the transaction can buy tokens
