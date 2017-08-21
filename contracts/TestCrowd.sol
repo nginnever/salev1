@@ -1,7 +1,6 @@
 pragma solidity ^0.4.11;
 
-import './MatryxToken.sol';
-import './MintableToken.sol';
+//import './MatryxToken.sol';
 import './math/SafeMath.sol';
 import './Haltable.sol';
 import './ownership/Ownable.sol';
@@ -16,17 +15,24 @@ import './ownership/Ownable.sol';
  *
  * This crowdsale contract is also based on the TokenMarket Crowdsale
  */
-contract Crowdsale is Ownable, Haltable {
+contract TestCrowd is Ownable, Haltable {
   using SafeMath for uint256;
 
+  bool public test;
   bool public test1;
   bool public test2;
   bool public test3;
+  bool public test4;
+  bool public test5;
+  bool public test6;
+  bool public test7;
+  address public bene;
+  uint256 public msgValue;
+  uint256 public test8;
 
   // The token being sold
   //MatryxToken public token = MatryxToken(0x392985aEF88D4Ef849A6Ec230706B71609403F59);
-  MatryxToken public token;
-  //MintableToken public token;
+  //MatryxToken public token;
 
   // start and end timestamps where investments are allowed (both inclusive)
   uint256 public startTime;
@@ -37,16 +43,16 @@ contract Crowdsale is Ownable, Haltable {
   address public wallet;
 
   // how many token units a buyer gets per wei
-  uint256 public rate = 1164;
+  uint256 public rate = 1164 wei;
 
   // how many token units a buyer gets per wei with tier 1 discount
-  uint256 public lowDiscountRate = 2164;
+  uint256 public lowDiscountRate = 2164 wei;
 
   // how many token units a buyer gets per wei with tier 2 discount
-  uint256 public highDiscountRate = 3164;
+  uint256 public highDiscountRate = 3164 wei;
 
   // how many token units a buyer gets per wei with tier 3 discount
-  uint256 public whitelistRate = 4164;
+  uint256 public whitelistRate = 4164 wei;
 
   // amount of raised money in wei
   uint256 public weiRaised;
@@ -95,27 +101,23 @@ contract Crowdsale is Ownable, Haltable {
 
   event Finalized();
 
-  function Crowdsale(uint256 _startTime, uint256 _endTime, address _wallet) {
-    //require(_token != 0x0);
+  function TestCrowd(uint256 _startTime, uint256 _endTime, address _token, address _wallet) {
+    require(_token != 0x0);
     require(_startTime >= now);
     require(_endTime >= _startTime);
     require(_wallet != 0x0);
 
-    token = createTokenContract();
-    //token = MatryxToken(_token);
+    //token = createTokenContract(_token);
     wallet = _wallet;
     startTime = _startTime;
     endTime = _endTime;
   }
 
-  //creates the token to be sold. 
-  //override this method to have crowdsale of a specific mintable token.
-  function createTokenContract(address _token) internal returns (MatryxToken) {
-  //function createTokenContract() internal returns (MintableToken) {
-    //return MatryxToken(_token);
-    //return new MintableToken();
-    return new MatryxToken();
-  }
+  // creates the token to be sold. 
+  // override this method to have crowdsale of a specific mintable token.
+  // function createTokenContract(address _token) internal returns (MatryxToken) {
+  //   return MatryxToken(_token);
+  // }
 
   // fallback function can be used to buy tokens
   function () payable {
@@ -124,13 +126,20 @@ contract Crowdsale is Ownable, Haltable {
 
   // low level token purchase function
   function buyTokens(address beneficiary) payable {
+    bene = beneficiary;
+    msgValue = msg.value;
     require(beneficiary != 0x0);
     require(msg.value != 0);
 
     if(now < startTime) {
-      require(validPrePurchase());
-      //test2 = true;
-      buyPresale(beneficiary);
+      if(!validPrePurchase()){
+        test4 = true;
+      }
+      if(validPrePurchase()){
+        test3 = true;
+      }
+      //require(validPrePurchase());
+      //buyPresale(beneficiary);
     } else {
       require(validPurchase());
       buySale(beneficiary);
@@ -144,19 +153,16 @@ contract Crowdsale is Ownable, Haltable {
     // calculate discount
     if(whitelist[msg.sender]) {
       tokens = weiAmount.mul(whitelistRate);
-    // test this!!!! what if in the whitelist and sent over 100 ether? if else makes this okay?
     } else if(weiAmount < 100 * 10**18) {
-      // Not whitelisted so they must have sent over 50 ether 
       tokens = weiAmount.mul(lowDiscountRate);
     } else {
-      // Over 100 ether was sent
       tokens = weiAmount.mul(highDiscountRate);
     }
 
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
-    token.mint(beneficiary, tokens);
+    //token.mint(beneficiary, tokens);
 
     // update the early list so they may purchase smaller amounts
     //earlyParticipantList[msg.sender] = true;
@@ -179,7 +185,7 @@ contract Crowdsale is Ownable, Haltable {
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
-    token.mint(beneficiary, tokens);
+    //token.mint(beneficiary, tokens);
 
     // update the early list so they may purchase smaller amounts
     //earlyParticipantList[msg.sender] = true;
@@ -213,7 +219,7 @@ contract Crowdsale is Ownable, Haltable {
    * executed entirely.
    */
   function finalization() internal {
-    // TODO write finalization logic
+
   }
 
   // send ether to the fund collection wallet
@@ -231,21 +237,21 @@ contract Crowdsale is Ownable, Haltable {
   function validPrePurchase() internal constant returns (bool) {
     bool canPrePurchase = 50 * 10**18 <= msg.value || whitelist[msg.sender];
     bool withinCap = weiRaised.add(msg.value) <= presaleCap;
-    //test3 = 50 * 10**18 <= msg.value || whitelist[msg.sender];
     return canPrePurchase && withinCap;
   }
 
   // @return true if the transaction can buy tokens
   function validPurchase() internal constant returns (bool) {
-    bool withinPeriod = now <= endTime;
+    bool withinPeriod = now >= startTime && now <= endTime;
     bool withinCap = weiRaised.add(msg.value) <= cap;
+    test = withinPeriod && withinCap;
     return withinPeriod && withinCap;
   }
 
   // @return true if crowdsale event has ended
   function hasEnded() public constant returns (bool) {
     bool capReached = weiRaised >= cap;
-    return now > endTime || capReached;
+    return now > endTime && capReached;
   }
 
 
