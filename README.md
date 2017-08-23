@@ -1,4 +1,16 @@
-test sale structures
+## Matryx Token
+
+```
+Total Supply: 314,159,265 MTX
+Name: MatryxToken
+Symbol: MTX
+Ether Cap: 161,803 Eth
+```
+
+## Requirements
+
+npm/node
+truffle
 
 ## Install
 
@@ -15,3 +27,11 @@ test sale structures
 ## Test
 
 ```node node_modules/truffle/build/cli.bundled.js test```
+
+## TODO
+
+- Customer serverside UUID and database?
+- Finalization logic
+- Set up non-kovan testrpc
+- write unit tests
+
