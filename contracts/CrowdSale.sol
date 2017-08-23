@@ -19,10 +19,6 @@ import './ownership/Ownable.sol';
 contract Crowdsale is Ownable, Haltable {
   using SafeMath for uint256;
 
-  bool public test1;
-  bool public test2;
-  bool public test3;
-
   // The token being sold
   //MatryxToken public token = MatryxToken(0x392985aEF88D4Ef849A6Ec230706B71609403F59);
   MatryxToken public token;
@@ -129,7 +125,6 @@ contract Crowdsale is Ownable, Haltable {
 
     if(now < startTime) {
       require(validPrePurchase());
-      //test2 = true;
       buyPresale(beneficiary);
     } else {
       require(validPurchase());
@@ -214,6 +209,7 @@ contract Crowdsale is Ownable, Haltable {
    */
   function finalization() internal {
     // TODO write finalization logic
+    
   }
 
   // send ether to the fund collection wallet
@@ -231,7 +227,6 @@ contract Crowdsale is Ownable, Haltable {
   function validPrePurchase() internal constant returns (bool) {
     bool canPrePurchase = 50 * 10**18 <= msg.value || whitelist[msg.sender];
     bool withinCap = weiRaised.add(msg.value) <= presaleCap;
-    //test3 = 50 * 10**18 <= msg.value || whitelist[msg.sender];
     return canPrePurchase && withinCap;
   }
 
