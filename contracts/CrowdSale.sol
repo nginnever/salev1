@@ -106,7 +106,7 @@ contract Crowdsale is Ownable, Haltable {
 
   //creates the token to be sold. 
   //override this method to have crowdsale of a specific mintable token.
-  function createTokenContract(address _token) internal returns (MatryxToken) {
+  function createTokenContract() internal returns (MatryxToken) {
   //function createTokenContract() internal returns (MintableToken) {
     //return MatryxToken(_token);
     //return new MintableToken();
