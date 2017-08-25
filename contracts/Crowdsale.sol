@@ -44,6 +44,12 @@ contract Crowdsale is Ownable, Haltable {
   // how many token units a buyer gets per wei with tier 3 discount
   uint256 public whitelistRate = 4164;
 
+  // the minimimum presale purchase amount in ether
+  uint256 public tierOnePurchase = 50 * 10**18;
+
+  // the second tier discount presale purchase amount in ether
+  uint256 public tierTwoPurchase = 100 * 10**18;
+
   // amount of raised money in wei
   uint256 public weiRaised;
 
@@ -107,9 +113,6 @@ contract Crowdsale is Ownable, Haltable {
   //creates the token to be sold. 
   //override this method to have crowdsale of a specific mintable token.
   function createTokenContract() internal returns (MatryxToken) {
-  //function createTokenContract() internal returns (MintableToken) {
-    //return MatryxToken(_token);
-    //return new MintableToken();
     return new MatryxToken();
   }
 
@@ -140,7 +143,7 @@ contract Crowdsale is Ownable, Haltable {
     if(whitelist[msg.sender]) {
       tokens = weiAmount.mul(whitelistRate);
     // test this!!!! what if in the whitelist and sent over 100 ether? if else makes this okay?
-    } else if(weiAmount < 100 * 10**18) {
+    } else if(weiAmount < tierTwoPurchase) {
       // Not whitelisted so they must have sent over 50 ether 
       tokens = weiAmount.mul(lowDiscountRate);
     } else {
@@ -225,7 +228,7 @@ contract Crowdsale is Ownable, Haltable {
 
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {
-    bool canPrePurchase = 50 * 10**18 <= msg.value || whitelist[msg.sender];
+    bool canPrePurchase = tierOnePurchase <= msg.value || whitelist[msg.sender];
     bool withinCap = weiRaised.add(msg.value) <= presaleCap;
     return canPrePurchase && withinCap;
   }
