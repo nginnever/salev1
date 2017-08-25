@@ -53,4 +53,5 @@ run truffle tests
 - upgrade path
 - Finalization logic
 - write unit tests
+- update haltable.sol throws to require
 
