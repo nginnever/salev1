@@ -7,20 +7,13 @@ import './Haltable.sol';
 import './ownership/Ownable.sol';
 
 /**
- * @title Crowdsale 
- * @dev Crowdsale is a base contract for managing a token crowdsale.
- * Crowdsales have a start and end timestamps, where investors can make
- * token purchases and the crowdsale will assign them tokens based
- * on a token per ETH rate. Funds collected are forwarded to a wallet 
- * as they arrive.
- *
- * This crowdsale contract is also based on the TokenMarket Crowdsale
+ * @title TestCrowdsale
+ * This is for manual testing of unix epochs
  */
-contract Crowdsale is Ownable, Haltable {
+contract TestCrowdsale is Ownable, Haltable {
   using SafeMath for uint256;
 
   // The token being sold
-  //MatryxToken public token = MatryxToken(0x392985aEF88D4Ef849A6Ec230706B71609403F59);
   MatryxToken public token;
 
   // presale, start and end timestamps where investments are allowed
@@ -103,8 +96,14 @@ contract Crowdsale is Ownable, Haltable {
 
   event Finalized();
 
-  function Crowdsale(uint256 _presaleStartTime, uint256 _startTime, uint256 _endTime, address _wallet) {
+  function TestCrowdsale() {
     //require(_token != 0x0);
+    // test constructor args manually
+    uint256 _presaleStartTime = 1506399909;
+    uint256 _startTime = 1508991909;
+    uint256 _endTime = 1511673909;
+    address _wallet = 0x01da6F5F5C89F3a83CC6BeBb0eAFC1f1E1c4A303;
+
     require(_startTime >= now);
     require(_presaleStartTime >= now && _presaleStartTime < _startTime);
     require(_endTime >= _startTime);
@@ -117,7 +116,13 @@ contract Crowdsale is Ownable, Haltable {
     startTime = _startTime;
     endTime = _endTime;
   }
-
+  
+  // test helper to set times
+  function setTime(uint256 _presaleStartTime, uint256 _startTime, uint256 _endTime) {
+    presaleStartTime = _presaleStartTime;
+    startTime = _startTime;
+    endTime = _endTime;
+  }
   //creates the token to be sold. 
   //override this method to have crowdsale of a specific mintable token.
   function createTokenContract() internal returns (MatryxToken) {
@@ -130,10 +135,11 @@ contract Crowdsale is Ownable, Haltable {
   }
 
   // low level token purchase function
-  function buyTokens(address beneficiary) payable {
+  function buyTokens(address beneficiary) stopInEmergency payable {
     require(beneficiary != 0x0);
     require(msg.value != 0);
-
+    require(!hasEnded());
+    
     if(isPresale()) {
       require(validPrePurchase());
       buyPresale(beneficiary);
@@ -243,7 +249,7 @@ contract Crowdsale is Ownable, Haltable {
 
   // @return true if the transaction can buy tokens
   function validPurchase() internal constant returns (bool) {
-    bool withinPeriod = now <= endTime && now >= presaleStartTime;
+    bool withinPeriod = now >= presaleStartTime && now <= endTime;
     bool withinCap = weiRaised.add(msg.value) <= cap;
     return withinPeriod && withinCap;
   }

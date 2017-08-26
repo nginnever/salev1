@@ -1,8 +1,10 @@
-var Crowdsale = artifacts.require("./Crowdsale.sol")
+var Crowdsale = artifacts.require("./TestCrowdsale.sol")
 var Token = artifacts.require("./MatryxToken")
 
 var inst
 var token
+console.log("===")
+console.log(new Date().getTime())
 
 contract('Presale', function(accounts) {
   // Token Tests
@@ -31,16 +33,50 @@ contract('Presale', function(accounts) {
   it("updates the presale whitelist", function() {
     return Crowdsale.deployed().then(function(instance) {
       inst = instance	
-      return instance.updateWhitelist("0x00c1b6f5d5939bd8c71b3c37ce830321c47dbcdb", {from: "0x01da6f5f5c89f3a83cc6bebb0eafc1f1e1c4a303"})
+      return instance.updateWhitelist(accounts[1], {from: accounts[0]})
     }).then(function(tx) {
       //console.log(ret)
-      return inst.whitelist("0x00c1b6f5d5939bd8c71b3c37ce830321c47dbcdb")
+      return inst.whitelist(accounts[1])
     }).then(function(listed){
       assert.isTrue(listed)
     })
   })
-  it("can't buy presale non-whitelist purchase", function() {
-    return inst.sendTransaction({from: "0x01da6f5f5c89f3a83cc6bebb0eafc1f1e1c4a303", value: 20000}).then(function(res) {
+  it("halts payments in an emergency", function() {
+    return inst.halt({from: accounts[0]})
+    // return Crowdsale.deployed().then(function(instance) {
+    //   inst = instance 
+    //   return instance.updateWhitelist(accounts[1], {from: accounts[0]})
+    // }).then(function(tx) {
+    //   //console.log(ret)
+    //   return inst.whitelist(accounts[1])
+    // }).then(function(listed){
+    //   assert.isTrue(listed)
+    // })
+  })
+  it("can't buy before presale time", function() {
+    return inst.sendTransaction({from: accounts[0], value: 20000}).then(function(res) {
+      //console.log(res)
+      return inst.weiRaised.call().then(function(raised){
+        // assert weiRaiser = 0
+        console.log(raised.toNumber())
+        // assert balance returned to purchaser
+        console.log(web3.eth.getBalance(accounts[0]).toNumber())
+        console.log(web3.eth.getBalance(accounts[1]).toNumber())
+        return token.totalSupply.call().then(function(totalSupply){
+          // assert total supply = 20000 * 4164
+          console.log("-totalSupply-")
+          console.log(totalSupply.toNumber())
+          return token.balanceOf(accounts[0])
+        }).then(function(purchased) {
+          // assert total = 20000 * 4164
+          console.log("-tokens purchased")
+          console.log(purchased.toNumber())
+        })
+      })
+    })
+  })
+  it("can't buy presale low value non-whitelist purchase", function() {
+    return inst.sendTransaction({from: accounts[0], value: 20000}).then(function(res) {
       //console.log(res)
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaiser = 0
@@ -52,14 +88,14 @@ contract('Presale', function(accounts) {
     })
   })
   it("can buy presale whitelist purchase", function() {
-    return inst.sendTransaction({from: "0x00c1b6f5d5939bd8c71b3c37ce830321c47dbcdb", value: 20000}).then(function(res) {
+    return inst.sendTransaction({from: accounts[1], value: 20000}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000
         console.log(raised.toNumber())
         return token.totalSupply.call().then(function(totalSupply){
           // assert total supply = 20000 * 4164
           console.log(totalSupply.toNumber())
-          return token.balanceOf("0x00c1b6f5d5939bd8c71b3c37ce830321c47dbcdb")
+          return token.balanceOf(accounts[1])
         }).then(function(purchased) {
           // assert total = 20000 * 4164
           console.log(purchased.toNumber())
@@ -68,14 +104,14 @@ contract('Presale', function(accounts) {
     })
   })
   it("can buy presale tier one purchase", function() {
-    return inst.sendTransaction({from: "0x01da6f5f5c89f3a83cc6bebb0eafc1f1e1c4a303", value: 50000000000000000000}).then(function(res) {
+    return inst.sendTransaction({from: accounts[0], value: 50000000000000000000}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 50 eth
         console.log(raised.toNumber())
         return token.totalSupply.call().then(function(totalSupply){
           // assert total supply = 20000 * 4164 + 50 eth * 2164
           console.log(web3.fromWei(totalSupply.toNumber()))
-          return token.balanceOf("0x01da6f5f5c89f3a83cc6bebb0eafc1f1e1c4a303")
+          return token.balanceOf(accounts[0])
         }).then(function(purchased) {
           // assert total = 50 eth * 2164
           var amount = web3.fromWei(purchased.toNumber())
@@ -86,14 +122,14 @@ contract('Presale', function(accounts) {
     })
   })
   it("can buy presale tier two purchase", function() {
-    return inst.sendTransaction({from: "0x01da6f5f5c89f3a83cc6bebb0eafc1f1e1c4a303", value: 100000000000000000000}).then(function(res) {
+    return inst.sendTransaction({from: accounts[0], value: 100000000000000000000}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 50 eth + 100 eth
         console.log(raised.toNumber())
         return token.totalSupply.call().then(function(totalSupply){
           // assert total supply = 20000 * 4164 + 50 eth * 2164 + 100 eth * 3164
           console.log(web3.fromWei(totalSupply.toNumber()))
-          return token.balanceOf("0x01da6f5f5c89f3a83cc6bebb0eafc1f1e1c4a303")
+          return token.balanceOf(accounts[0])
         }).then(function(purchased) {
           // assert total = 50 eth * 2164 + 100 eth * 3164
           var amount = web3.fromWei(purchased.toNumber())
