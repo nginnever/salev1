@@ -30,16 +30,16 @@ contract TestCrowdsale is Ownable, Haltable {
   uint256 public baseRate = 1164;
 
   // how many token units a buyer gets per wei with tier 1 discount
-  uint256 public tierOneRate = 2164;
+  // uint256 public tierOneRate = 2164;
 
-  // how many token units a buyer gets per wei with tier 2 discount
-  uint256 public tierTwoRate = 3164;
+  // how many token units a buyer gets per wei with tier 2 10% discount
+  uint256 public tierTwoRate = 1281;
 
-  // how many token units a buyer gets per wei with tier 3 discount
-  uint256 public tierThreeRate = 4164;
+  // how many token units a buyer gets per wei with tier 3 15% discount
+  uint256 public tierThreeRate = 1339;
 
-  // how many token units a buyer gets per wei with a whitelisted discount
-  uint256 public whitelistRate = 4164;
+  // how many token units a buyer gets per wei with a whitelisted 20% discount
+  uint256 public whitelistRate = 1397;
 
   // the minimimum presale purchase amount in ether
   uint256 public tierOnePurchase = 75 * 10**18;
@@ -53,14 +53,14 @@ contract TestCrowdsale is Ownable, Haltable {
   // amount of raised money in wei
   uint256 public weiRaised;
 
-  // Total amount to be sold
-  uint256 public cap = 188338692 * 10**18;
+  // Total amount to be sold in ether
+  uint256 public cap = 161803 * 10**18;
 
-  // Total amount to be sold in the presale
-  uint256 public presaleCap = 94169346 * 10**18;
+  // Total amount to be sold in the presale in ether
+  uint256 public presaleCap = 809015 * 10**17;
 
   // Has this crowdsale been finalized
-  bool public finalized;
+  // bool public finalized;
 
   // Do we need to have unique contributor id for each customer
   bool public requireCustomerId;
@@ -157,13 +157,15 @@ contract TestCrowdsale is Ownable, Haltable {
     // calculate discount
     if(whitelist[msg.sender]) {
       tokens = weiAmount.mul(whitelistRate);
-    // test this!!!! what if in the whitelist and sent over 100 ether? if else makes this okay?
     } else if(weiAmount < tierTwoPurchase) {
-      // Not whitelisted so they must have sent over 50 ether 
-      tokens = weiAmount.mul(tierOneRate);
-    } else {
-      // Over 100 ether was sent
+      // Not whitelisted so they must have sent over 75 ether 
+      tokens = weiAmount.mul(baseRate);
+    } else if(weiAmount < tierThreePurchase) {
+      // Over 150 ether was sent
       tokens = weiAmount.mul(tierTwoRate);
+    } else {
+      // Over 300 ether was sent
+      tokens = weiAmount.mul(tierThreeRate);
     }
 
     // update state
@@ -243,6 +245,8 @@ contract TestCrowdsale is Ownable, Haltable {
 
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {
+    // this asserts that the value is at least the lowest tier 
+    // or the address has been whitelisted to purchase with less
     bool canPrePurchase = tierOnePurchase <= msg.value || whitelist[msg.sender];
     bool withinCap = weiRaised.add(msg.value) <= presaleCap;
     return canPrePurchase && withinCap;

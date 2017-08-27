@@ -66,7 +66,7 @@ contract Crowdsale is Ownable, Haltable {
   uint256 public presaleCap = 94169346 * 10**18;
 
   // Has this crowdsale been finalized
-  bool public finalized;
+  // bool public finalized;
 
   // Do we need to have unique contributor id for each customer
   bool public requireCustomerId;
