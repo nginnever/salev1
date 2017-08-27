@@ -228,8 +228,15 @@ contract TestCrowdsale is Ownable, Haltable {
    * executed entirely.
    */
   function finalization() internal {
-    // TODO write finalization logic
-    
+    // calculate token amount to be created
+    // expected tokens sold
+    uint256 tokens = 188495559*10**18;
+    // get the difference of sold and expected
+    tokens = tokens.sub(token.totalSupply());
+    // add the remaining Nanome 40% of tokens
+    tokens = tokens.add(125663706*10**18);
+    // issue tokens to the multisig wallet
+    token.mint(wallet, tokens);
   }
 
   // send ether to the fund collection wallet

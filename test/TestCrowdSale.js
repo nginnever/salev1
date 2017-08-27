@@ -335,6 +335,11 @@ contract('Presale', function(accounts) {
       return inst.isFinalized.call()
     }).then(function(final) {
       assert.equal(final, true, "Finalized was not set to true when called")
+      return token.totalSupply.call()
+    }).then(function(total) {
+      console.log("final supply")
+      console.log(web3.fromWei(total.toNumber()))
+      assert.equal(web3.fromWei(total.toNumber()), 314159265, "Finalize did not issue correct tokens")
     })
   })
 
