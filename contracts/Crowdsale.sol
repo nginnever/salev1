@@ -133,6 +133,7 @@ contract Crowdsale is Ownable, Haltable {
   function buyTokens(address beneficiary) payable {
     require(beneficiary != 0x0);
     require(msg.value != 0);
+    require(!hasEnded());
 
     if(isPresale()) {
       require(validPrePurchase());

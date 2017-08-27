@@ -8,6 +8,6 @@ module.exports = function(deployer) {
   if(test) {
   	deployer.deploy(TestCrowdsale)
   } else {
-    deployer.deploy(Crowdsale, 1503723092, 1503723092, 1503809492, "0x0040077926585455c40ceA126B37bED392aCa8C2")
+    deployer.deploy(Crowdsale, 1503789599, 1506500169, 1509092169, "0x0040077926585455c40ceA126B37bED392aCa8C2")
   }
 };

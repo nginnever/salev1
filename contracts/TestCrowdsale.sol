@@ -20,6 +20,7 @@ contract TestCrowdsale is Ownable, Haltable {
   uint256 public presaleStartTime;
   uint256 public startTime;
   uint256 public endTime;
+  uint256 public _now;
 
   // address where funds are collected
   //address public wallet = 0x0;
@@ -110,7 +111,6 @@ contract TestCrowdsale is Ownable, Haltable {
     require(_wallet != 0x0);
 
     token = createTokenContract();
-    //token = MatryxToken(_token);
     wallet = _wallet;
     presaleStartTime = _presaleStartTime;
     startTime = _startTime;
@@ -119,6 +119,7 @@ contract TestCrowdsale is Ownable, Haltable {
   
   // test helper to set times
   function setTime(uint256 _presaleStartTime, uint256 _startTime, uint256 _endTime) {
+    _now = now;
     presaleStartTime = _presaleStartTime;
     startTime = _startTime;
     endTime = _endTime;
