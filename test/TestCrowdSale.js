@@ -139,58 +139,24 @@ contract('Presale', function(accounts) {
 
     return inst.setTime(presale, start, end).then(function(){
       return inst.sendTransaction({from: accounts[1], value: 20000}).then(function(res) {
-        return inst.presaleStartTime.call()
-      }).then(function(pre) {
-        console.log('presale times')
-        console.log(presale)
-        console.log(pre.toNumber())
-        return inst.startTime.call()
-      }).then(function(_start) {
-        console.log('start times')
-        console.log(start)
-        console.log(_start.toNumber())
-        return inst.endTime.call()
-      }).then(function(_end){
-        console.log('end times')
-        console.log(end)
-        console.log(_end.toNumber())
-        return inst._now.call()
-      }).then(function(now){
-        console.log('now time')
-        console.log(now.toNumber())
-        return inst.weiRaised.call().then(function(raised){
-          // assert weiRaised = 20000
-          console.log('presale whitelist wei raised')
-          console.log(web3.fromWei(raised.toNumber()))
-          return token.totalSupply.call().then(function(totalSupply){
-            // assert total supply = 20000 * 4164
-            console.log('presale whitelist total supply')
-            console.log(totalSupply.toNumber())
-            return token.balanceOf(accounts[1])
-          }).then(function(purchased) {
-            // assert total = 20000 * 4164
-            console.log('presale whitelist token balance')
-            console.log(purchased.toNumber())
-            assert.equal(purchased.toNumber(), (20000*1397), "2000 wei presale purchase did not issue correct amount")
-          })
+        return inst.weiRaised.call()
+      }).then(function(raised){
+        // assert weiRaised = 20000
+        console.log('presale whitelist wei raised')
+        console.log(web3.fromWei(raised.toNumber()))
+        return token.totalSupply.call().then(function(totalSupply){
+          // assert total supply = 20000 * 4164
+          console.log('presale whitelist total supply')
+          console.log(totalSupply.toNumber())
+          return token.balanceOf(accounts[1])
+        }).then(function(purchased) {
+          // assert total = 20000 * 4164
+          console.log('presale whitelist token balance')
+          console.log(purchased.toNumber())
+          assert.equal(purchased.toNumber(), (20000*1397), "2000 wei presale purchase did not issue correct amount")
         })
       })
     })
-
-    // return inst.sendTransaction({from: accounts[1], value: 20000}).then(function(res) {
-    //   return inst.weiRaised.call().then(function(raised){
-    //     // assert weiRaised = 20000
-    //     console.log(raised.toNumber())
-    //     return token.totalSupply.call().then(function(totalSupply){
-    //       // assert total supply = 20000 * 4164
-    //       console.log(totalSupply.toNumber())
-    //       return token.balanceOf(accounts[1])
-    //     }).then(function(purchased) {
-    //       // assert total = 20000 * 4164
-    //       console.log(purchased.toNumber())
-    //     })
-    //   })
-    // })
   })
   it("can buy presale tier one purchase", function() {
     return inst.sendTransaction({from: accounts[0], value: 75*Math.pow(10, 18)}).then(function(res) {
