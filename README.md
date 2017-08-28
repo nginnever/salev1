@@ -52,7 +52,4 @@ run truffle tests
 
 - Customer serverside UUID and database?
 - upgrade path
-- Finalization logic
-- write unit tests
-- update haltable.sol throws to require
 
