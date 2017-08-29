@@ -55,11 +55,7 @@ contract('Presale', function(accounts) {
   })
   // CrowdSale Tests
   it("updates the presale whitelist", function() {
-    return Crowdsale.deployed().then(function(instance) {
-      crowdsaleAddy = instance.address
-      inst = instance	
-      return instance.updateWhitelist(accounts[1], {from: accounts[0]})
-    }).then(function(tx) {
+    return inst.updateWhitelist(accounts[1], {from: accounts[0]}).then(function(tx) {
       return inst.whitelist(accounts[1])
     }).then(function(listed){
       assert.isTrue(listed)
@@ -74,12 +70,12 @@ contract('Presale', function(accounts) {
         // assert weiRaiser = 0
         assert.equal(raised.toNumber(), 0, "wei raised is incorrect")
         return token.totalSupply.call().then(function(totalSupply){
-          // assert total supply = 20000 * 1397
-          assert.equal(totalSupply.toNumber(), 20000*1397, "whitelist presale buy not correct")
+          // assert total supply = 0
+          assert.equal(totalSupply.toNumber(), 0, "whitelist presale buy not correct")
           return token.balanceOf(accounts[0])
         }).then(function(purchased) {
-          // assert total = 20000 * 4164
-          assert.equal(purchased.toNumber(), 20000*1397, "purchaser balance presale buy not correct")
+          // assert total = 0
+          assert.equal(purchased.toNumber(), 0, "purchaser balance presale buy not correct")
         })
       })
     })
@@ -96,9 +92,7 @@ contract('Presale', function(accounts) {
       return inst.sendTransaction({from: accounts[0], value: 20000}).then(function(res) {
         return inst.weiRaised.call().then(function(raised) {
           // assert weiRaiser = 0
-          console.log('wei raised low value non-whitelist purchase')
-          console.log(raised.toNumber())
-          assert.equal(raised.toNumber(), 20000*1397, "can't presale buy not correct")
+          assert.equal(raised.toNumber(), 0, "can't presale buy not correct")
         })
       })
     })
@@ -117,15 +111,13 @@ contract('Presale', function(accounts) {
           return inst.weiRaised.call()
         }).then(function(raised) {
           // assert wei raised is 0
-          console.log('halted wei raised')
-          console.log(raised.toNumber())
+          assert.equal(raised.toNumber(), 0, "halted wei presale purchase did not issue correct amount")
           return inst.unhalt({from: accounts[0]})
         }).then(function(res) {
           return inst.halted.call()
         }).then(function(halted) {
           // assert halted is false now
-          console.log("is halted?")
-          console.log(halted)
+          assert.equal(halted, false, "could not unhalt crowdsale")
         })
       })
     })
@@ -143,17 +135,14 @@ contract('Presale', function(accounts) {
         return inst.weiRaised.call()
       }).then(function(raised){
         // assert weiRaised = 20000
-        console.log('presale whitelist wei raised')
-        console.log(web3.fromWei(raised.toNumber()))
+        assert.equal(raised.toNumber(), 20000, "whitelist presale purchase did not issue correct amount")
         return token.totalSupply.call().then(function(totalSupply){
-          // assert total supply = 20000 * 4164
-          console.log('presale whitelist total supply')
           console.log(totalSupply.toNumber())
+          // assert total supply = 20000 * 1397
+          assert.equal(totalSupply.toNumber(), 20000*1397, "halted wei presale purchase did not issue correct amount")
           return token.balanceOf(accounts[1])
         }).then(function(purchased) {
-          // assert total = 20000 * 4164
-          console.log('presale whitelist token balance')
-          console.log(purchased.toNumber())
+          // assert total = 20000 * 1397
           assert.equal(purchased.toNumber(), (20000*1397), "2000 wei presale purchase did not issue correct amount")
         })
       })
@@ -163,16 +152,18 @@ contract('Presale', function(accounts) {
     return inst.sendTransaction({from: accounts[0], value: 75*Math.pow(10, 18)}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 50 eth
-        console.log(web3.fromWei(raised.toNumber()))
+        assert.equal(raised.toNumber(), 20000 + 75*Math.pow(10, 18), "tier one presale purchase did not issue correct amount")
         return token.totalSupply.call().then(function(totalSupply){
-          // assert total supply = 20000 * 4164 + 50 eth * 2164
-          console.log(web3.fromWei(totalSupply.toNumber()))
+          console.log(totalSupply.toNumber())
+          console.log(20000*1397 + (75*Math.pow(10, 18))*1164)
+          // assert total supply = 20000 * 1397 + 75 eth * 1164
+          assert.equal(totalSupply.toNumber(), 20000*1397 + (75*Math.pow(10, 18))*1164, "tier one presale totalSupply did not issue correct amount")
           return token.balanceOf(accounts[0])
         }).then(function(purchased) {
           // assert total = 50 eth * 2164
           var amount = web3.fromWei(purchased.toNumber())
-          assert.equal(amount, (75*1164), "50 eth purchase did not issue correct amount")
-          console.log(web3.fromWei(purchased.toNumber()))
+          console.log(purchased.toNumber())
+          assert.equal(amount, (75*1164), "75 eth purchase did not issue correct amount")
         })
       })
     })
