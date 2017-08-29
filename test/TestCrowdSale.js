@@ -7,6 +7,7 @@ var token
 var presale
 var start
 var end
+var crowdsaleAddy
 
 contract('Presale', function(accounts) {
   // Token Tests
@@ -15,6 +16,7 @@ contract('Presale', function(accounts) {
       inst = instance
       return instance.token()
     }).then(function(address){
+      crowdsaleAddy = address
       // assert address exists
       console.log(address)
       Token.at(address).then(function(instance) {
@@ -28,6 +30,21 @@ contract('Presale', function(accounts) {
           console.log(name)
         })
       })
+    })
+  })
+  it("Crowdsale has correct owner", function(){
+    return inst.owner.call().then(function(owner){
+      console.log("owner")
+      console.log(owner)
+      assert.equal(owner, accounts[0])
+    })
+  })
+  it("token has correct owner", function(){
+    return token.owner.call().then(function(owner){
+      console.log("owner")
+      console.log(owner)
+      // assert token is owned by crowdsale contract
+      assert.equal(owner, crowdsaleAddy)
     })
   })
   it("sets the timestamps", function(){
@@ -306,6 +323,13 @@ contract('Presale', function(accounts) {
       console.log("final supply")
       console.log(web3.fromWei(total.toNumber()))
       assert.equal(web3.fromWei(total.toNumber()), 314159265, "Finalize did not issue correct tokens")
+      return token.mintingFinished.call()
+    }).then(function(doneMinting) {
+      assert.equal(doneMinting, true)
+      return token.owner.call()
+    }).then(function(owner) {
+      // assert that the token is now owned by master account
+      assert.equal(owner, accounts[0])
     })
   })
 
