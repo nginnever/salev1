@@ -13,10 +13,10 @@ contract('Presale', function(accounts) {
   // Token Tests
   it("Crowdsale & Token deployed", function() {
     return Crowdsale.deployed().then(function(instance){
+      crowdsaleAddy = instance.address
       inst = instance
       return instance.token()
     }).then(function(address){
-      crowdsaleAddy = address
       // assert address exists
       console.log(address)
       Token.at(address).then(function(instance) {
