@@ -17,32 +17,26 @@ contract('Presale', function(accounts) {
       inst = instance
       return instance.token()
     }).then(function(address){
-      // assert address exists
-      console.log(address)
       Token.at(address).then(function(instance) {
         token = instance;
         return token.totalSupply.call()
       }).then(function(total) {
-        console.log(total.toNumber())
         // assert totalSupply init to 0
+        assert.equal(total, 0, "totalSupply not initilized correctly")
         return token.name.call().then(function(name){
           // assert vanity variable is set
-          console.log(name)
+          assert.equal(name, "MatryxToken", "vanity variable not set correctly")
         })
       })
     })
   })
   it("Crowdsale has correct owner", function(){
     return inst.owner.call().then(function(owner){
-      console.log("owner")
-      console.log(owner)
       assert.equal(owner, accounts[0])
     })
   })
   it("token has correct owner", function(){
     return token.owner.call().then(function(owner){
-      console.log("owner")
-      console.log(owner)
       // assert token is owned by crowdsale contract
       assert.equal(owner, crowdsaleAddy)
     })
@@ -53,24 +47,21 @@ contract('Presale', function(accounts) {
     end = new Date().getTime() + 3
 
     return inst.setTime(presale, start, end).then(function(){
-      console.log("timestamps")
-      console.log(presale)
       return inst.presaleStartTime.call()
     }).then(function(time) {
       // assert presale 
-      console.log(time.toNumber())
+      assert.equal(time, presale, "presale time not set correctly")
     })
   })
   // CrowdSale Tests
   it("updates the presale whitelist", function() {
     return Crowdsale.deployed().then(function(instance) {
+      crowdsaleAddy = instance.address
       inst = instance	
       return instance.updateWhitelist(accounts[1], {from: accounts[0]})
     }).then(function(tx) {
-      //console.log(ret)
       return inst.whitelist(accounts[1])
     }).then(function(listed){
-      console.log("whitelist updated")
       assert.isTrue(listed)
     })
   })
@@ -81,19 +72,14 @@ contract('Presale', function(accounts) {
     return inst.sendTransaction({from: accounts[0], value: 20000}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaiser = 0
-        console.log(raised.toNumber())
-        // assert balance returned to purchaser
-        //console.log(web3.eth.getBalance(accounts[0]).toNumber())
-        //console.log(web3.eth.getBalance(accounts[1]).toNumber())
+        assert.equal(raised.toNumber(), 0, "wei raised is incorrect")
         return token.totalSupply.call().then(function(totalSupply){
-          // assert total supply = 20000 * 4164
-          console.log("-totalSupply-")
-          console.log(totalSupply.toNumber())
+          // assert total supply = 20000 * 1397
+          assert.equal(totalSupply.toNumber(), 20000*1397, "whitelist presale buy not correct")
           return token.balanceOf(accounts[0])
         }).then(function(purchased) {
           // assert total = 20000 * 4164
-          console.log("-tokens purchased")
-          console.log(purchased.toNumber())
+          assert.equal(purchased.toNumber(), 20000*1397, "purchaser balance presale buy not correct")
         })
       })
     })
@@ -112,9 +98,7 @@ contract('Presale', function(accounts) {
           // assert weiRaiser = 0
           console.log('wei raised low value non-whitelist purchase')
           console.log(raised.toNumber())
-          // assert balance returned to purchaser
-          // console.log(web3.eth.getBalance(accounts[0]).toNumber())
-          // console.log(web3.eth.getBalance(accounts[1]).toNumber())
+          assert.equal(raised.toNumber(), 20000*1397, "can't presale buy not correct")
         })
       })
     })
@@ -325,11 +309,11 @@ contract('Presale', function(accounts) {
       assert.equal(web3.fromWei(total.toNumber()), 314159265, "Finalize did not issue correct tokens")
       return token.mintingFinished.call()
     }).then(function(doneMinting) {
-      assert.equal(doneMinting, true)
+      assert.equal(doneMinting, true, "finished minting was not set correctly")
       return token.owner.call()
     }).then(function(owner) {
       // assert that the token is now owned by master account
-      assert.equal(owner, accounts[0])
+      assert.equal(owner, accounts[0], "ownership was not transferred correctly")
     })
   })
 
