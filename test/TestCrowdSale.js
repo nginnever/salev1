@@ -58,7 +58,6 @@ contract('Crowdsale', function(accounts) {
       assert.equal(time, presale, "presale time not set correctly")
     })
   })
-  // CrowdSale Tests
   it("updates the presale whitelist", function() {
     return inst.updateWhitelist(accounts[1], {from: accounts[0]}).then(function(tx) {
       return inst.whitelist(accounts[1])
@@ -152,6 +151,16 @@ contract('Crowdsale', function(accounts) {
           assert.equal(purchased.toNumber(), (20000*1397), "20000 wei presale purchase did not issue correct amount")
         })
       })
+    })
+  })
+  it("only owner can mint", function() {
+    return token.mint(crowdsaleAddy, 20000, {from: accounts[0]}).then(function(tx) {
+      return token.totalSupply.call()
+    }).then(function(totalSupply){
+      tSupply = totalSupply
+      // assert total supply = 20000 * 1397
+      assert.equal(totalSupply.toNumber(), 20000*1397, "direct minting purchase did not issue correct amount")
+      // assert weiRaised = 20000
     })
   })
   it("can buy presale tier one purchase", function() {

@@ -1,4 +1,4 @@
-var test = false
+var test = true
 var account
 
 if(test){
