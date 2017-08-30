@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/nginnever/salev1#readme",
   "dependencies": {
-    "bignumber.js": "^4.0.2",
-    "truffle": "^3.4.8"
+    "bignumber.js": "^4.0.2"
   }
 }
