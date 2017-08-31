@@ -1,14 +1,19 @@
 pragma solidity ^0.4.11;
 
 import './MatryxToken.sol';
-import './MintableToken.sol';
 import './math/SafeMath.sol';
 import './Haltable.sol';
 import './ownership/Ownable.sol';
 
 /**
- * @title TestCrowdsale
- * This is for manual testing of unix epochs
+ * @title Crowdsale
+ * Matryx crowdsale contract based on Open Zeppelin contract
+ * This crowdsale is modified to have a presale time period
+ * A whitelist function is added to allow discounts. There are
+ * three tiers of tokens purchased per wei based on msg value.
+ * A finalization function can be called by the owner to issue 
+ * Matryx reserves, close minting, and transfer token ownership 
+ * away from the crowdsale and back to the owner.
  */
 contract Crowdsale is Ownable, Haltable {
   using SafeMath for uint256;
@@ -51,11 +56,8 @@ contract Crowdsale is Ownable, Haltable {
   // Total amount to be sold in ether
   uint256 public cap = 161803 * 10**18;
 
-  // Total amount to be sold in the presale in ether
+  // Total amount to be sold in the presale in. cap/2
   uint256 public presaleCap = 809015 * 10**17;
-
-  // Do we need to have unique contributor id for each customer
-  bool public requireCustomerId;
 
   // Is the contract finalized
   bool public isFinalized = false;
@@ -63,7 +65,7 @@ contract Crowdsale is Ownable, Haltable {
   // How much ETH each address has invested to this crowdsale
   mapping (address => uint256) public investedAmountOf;
 
-  // How much tokens this crowdsale has credited for each investor address
+  // How many tokens this crowdsale has credited for each investor address
   mapping (address => uint256) public tokenAmountOf;
 
   // Addresses of whitelisted presale investors.
@@ -215,7 +217,26 @@ contract Crowdsale is Ownable, Haltable {
   // Allow the owner to update the presale whitelist
   function updateWhitelist(address _purchaser) onlyOwner {
     whitelist[_purchaser] = true;
+    Whitelisted(_purchaser, true);
   }
+
+  /**
+   * Allow crowdsale owner to close early or extend the crowdsale.
+   *
+   * This is useful e.g. for a manual soft cap implementation:
+   * - after X amount is reached determine manual closing
+   *
+   * This may put the crowdsale to an invalid state,
+   * but we trust owners know what they are doing.
+   *
+   */
+  function setEndsAt(uint time) onlyOwner {
+    require(now < time);
+
+    endTime = time;
+    EndsAtChanged(endTime);
+  }
+
 
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {

@@ -14,6 +14,12 @@ var a1Balance
 var tSupply
 var wieSupply
 
+var n1 = new BigNumber(75*Math.pow(10, 18))
+var n2 = new BigNumber(150*Math.pow(10, 18))
+var n3 = new BigNumber(300*Math.pow(10, 18))
+var n4 = new BigNumber(20000)
+var n5 = new BigNumber(1*Math.pow(10, 18))
+
 contract('Crowdsale', function(accounts) {
   // Token Tests
   it("Crowdsale & Token deployed", function() {
@@ -56,6 +62,19 @@ contract('Crowdsale', function(accounts) {
     }).then(function(time) {
       // assert presale 
       assert.equal(time, presale, "presale time not set correctly")
+      end = new Date().getTime()
+      return inst.setEndsAt(end).then(function(){
+        return inst.endTime.call()
+      }).then(function(endTime){
+        assert.equal(end, endTime, "end time not set correctly")
+        // assert only owner can change end time
+        var _end = new Date().getTime() + 1337
+        return inst.setEndsAt(_end, {from: accounts[1]}).then(function(){
+          return inst.endTime.call()
+        }).then(function(endTime) {
+          assert.equal(end, endTime, "non owner called end time")
+        })
+      })
     })
   })
   it("updates the presale whitelist", function() {
@@ -184,11 +203,8 @@ contract('Crowdsale', function(accounts) {
     return inst.sendTransaction({from: accounts[0], value: 150*Math.pow(10, 18)}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 75 eth + 150 eth
-        var n1 = new BigNumber(75*Math.pow(10, 18))
-        var n2 = new BigNumber(150*Math.pow(10, 18))
-        var n3 = new BigNumber(20000)
         var s = n1.plus(n2)
-        var s = s.plus(n3)
+        var s = s.plus(n4)
         assert.equal(raised.toString(10), s.toString(10), "tier one presale purchase did not issue correct amount")
         return token.totalSupply.call().then(function(totalSupply){
           // assert total supply = 20000 * 1397 + 75 eth * 1164 + 150 eth * 1281
@@ -207,10 +223,6 @@ contract('Crowdsale', function(accounts) {
     return inst.sendTransaction({from: accounts[0], value: 300*Math.pow(10, 18)}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth
-        var n1 = new BigNumber(75*Math.pow(10, 18))
-        var n2 = new BigNumber(150*Math.pow(10, 18))
-        var n3 = new BigNumber(300*Math.pow(10, 18))
-        var n4 = new BigNumber(20000)
         var s = n1.plus(n2).plus(n3).plus(n4)
         assert.equal(raised.toString(10), s.toString(10), "tier one presale purchase did not issue correct amount")
         return token.totalSupply.call().then(function(totalSupply){
@@ -230,10 +242,6 @@ contract('Crowdsale', function(accounts) {
     return inst.sendTransaction({from: accounts[0], value: 803765*Math.pow(10, 17)}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth
-        var n1 = new BigNumber(75*Math.pow(10, 18))
-        var n2 = new BigNumber(150*Math.pow(10, 18))
-        var n3 = new BigNumber(300*Math.pow(10, 18))
-        var n4 = new BigNumber(20000)
         var s = n1.plus(n2).plus(n3).plus(n4)
         assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount")
         return token.totalSupply.call().then(function(totalSupply){
@@ -259,11 +267,6 @@ contract('Crowdsale', function(accounts) {
       return inst.sendTransaction({from: accounts[0], value: 1*Math.pow(10, 18)}).then(function(res) {
         return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth
-          var n1 = new BigNumber(75*Math.pow(10, 18))
-          var n2 = new BigNumber(150*Math.pow(10, 18))
-          var n3 = new BigNumber(300*Math.pow(10, 18))
-          var n4 = new BigNumber(20000)
-          var n5 = new BigNumber(1*Math.pow(10, 18))
           var s = n1.plus(n2).plus(n3).plus(n4).plus(n5)
           assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount")
           return token.totalSupply.call().then(function(totalSupply){
@@ -282,11 +285,6 @@ contract('Crowdsale', function(accounts) {
     return inst.sendTransaction({from: accounts[0], value: 161277*Math.pow(10, 18)}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
         // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth
-        var n1 = new BigNumber(75*Math.pow(10, 18))
-        var n2 = new BigNumber(150*Math.pow(10, 18))
-        var n3 = new BigNumber(300*Math.pow(10, 18))
-        var n4 = new BigNumber(20000)
-        var n5 = new BigNumber(1*Math.pow(10, 18))
         var s = n1.plus(n2).plus(n3).plus(n4).plus(n5)
         assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount") 
         return token.totalSupply.call().then(function(totalSupply){
@@ -308,11 +306,6 @@ contract('Crowdsale', function(accounts) {
       return inst.sendTransaction({from: accounts[0], value: 20000}).then(function(res) {
         return inst.weiRaised.call().then(function(raised) {
           // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth
-          var n1 = new BigNumber(75*Math.pow(10, 18))
-          var n2 = new BigNumber(150*Math.pow(10, 18))
-          var n3 = new BigNumber(300*Math.pow(10, 18))
-          var n4 = new BigNumber(20000)
-          var n5 = new BigNumber(1*Math.pow(10, 18))
           var s = n1.plus(n2).plus(n3).plus(n4).plus(n5)
           assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount")         
           return token.balanceOf(accounts[0])

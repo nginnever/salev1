@@ -1,7 +1,6 @@
 pragma solidity ^0.4.11;
 
 import './MatryxToken.sol';
-import './MintableToken.sol';
 import './math/SafeMath.sol';
 import './Haltable.sol';
 import './ownership/Ownable.sol';
@@ -55,12 +54,6 @@ contract TestCrowdsale is Ownable, Haltable {
 
   // Total amount to be sold in the presale in ether
   uint256 public presaleCap = 809015 * 10**17;
-
-  // Has this crowdsale been finalized
-  // bool public finalized;
-
-  // Do we need to have unique contributor id for each customer
-  bool public requireCustomerId;
 
   // Is the contract finalized
   bool public isFinalized = false;
@@ -243,7 +236,26 @@ contract TestCrowdsale is Ownable, Haltable {
   // Allow the owner to update the presale whitelist
   function updateWhitelist(address _purchaser) onlyOwner {
     whitelist[_purchaser] = true;
+    Whitelisted(_purchaser, true);
   }
+
+  /**
+   * Allow crowdsale owner to close early or extend the crowdsale.
+   *
+   * This is useful e.g. for a manual soft cap implementation:
+   * - after X amount is reached determine manual closing
+   *
+   * This may put the crowdsale to an invalid state,
+   * but we trust owners know what they are doing.
+   *
+   */
+  function setEndsAt(uint time) onlyOwner {
+    require(now < time);
+
+    endTime = time;
+    EndsAtChanged(endTime);
+  }
+
 
   // @return true if the presale transaction can buy tokens
   function validPrePurchase() internal constant returns (bool) {
