@@ -108,10 +108,10 @@ contract Crowdsale is Ownable, Haltable {
   }
 
   // low level token purchase function
+  // owner may halt payments here
   function buyTokens(address beneficiary) stopInEmergency payable {
     require(beneficiary != 0x0);
     require(msg.value != 0);
-    require(!hasEnded());
     
     if(isPresale()) {
       require(validPrePurchase());
@@ -143,11 +143,10 @@ contract Crowdsale is Ownable, Haltable {
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
-    token.mint(beneficiary, tokens);
-
-    // Update investor
     investedAmountOf[msg.sender] = investedAmountOf[msg.sender].add(msg.value);
     tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
+
+    token.mint(beneficiary, tokens);
 
     TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 
@@ -197,11 +196,9 @@ contract Crowdsale is Ownable, Haltable {
   function finalization() internal {
     // calculate token amount to be created
     // expected tokens sold
-    uint256 tokens = 188495559*10**18;
+    uint256 piTokens = 314159265*10**18;
     // get the difference of sold and expected
-    tokens = tokens.sub(token.totalSupply());
-    // add the remaining Nanome 40% of tokens
-    tokens = tokens.add(125663706*10**18);
+    uint256 tokens = piTokens.sub(token.totalSupply());
     // issue tokens to the multisig wallet
     token.mint(wallet, tokens);
     token.finishMinting();
@@ -249,7 +246,7 @@ contract Crowdsale is Ownable, Haltable {
 
   // @return true if the transaction can buy tokens
   function validPurchase() internal constant returns (bool) {
-    bool withinPeriod = now >= presaleStartTime && now <= endTime;
+    bool withinPeriod = now >= startTime && now <= endTime;
     bool withinCap = weiRaised.add(msg.value) <= cap;
     return withinPeriod && withinCap;
   }

@@ -160,10 +160,11 @@ contract TestCrowdsale is Ownable, Haltable {
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
-    token.mint(beneficiary, tokens);
+    // Update investor
+    investedAmountOf[msg.sender] = investedAmountOf[msg.sender].add(msg.value);
+    tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
 
-    // update the early list so they may purchase smaller amounts
-    //earlyParticipantList[msg.sender] = true;
+    token.mint(beneficiary, tokens);
 
     // Update investor
     investedAmountOf[msg.sender] = investedAmountOf[msg.sender].add(msg.value);
