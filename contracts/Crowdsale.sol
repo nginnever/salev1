@@ -178,7 +178,7 @@ contract Crowdsale is Ownable, Haltable {
    * work. Calls the contract's finalization function.
    */
   function finalize() onlyOwner {
-    require(!isFinalized);
+    //require(!isFinalized);
     require(hasEnded());
 
     finalization();

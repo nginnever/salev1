@@ -13,12 +13,15 @@ var a0Balance
 var a1Balance
 var tSupply
 var wieSupply
+var pt
 
 var n1 = new BigNumber(75*Math.pow(10, 18))
 var n2 = new BigNumber(150*Math.pow(10, 18))
 var n3 = new BigNumber(300*Math.pow(10, 18))
 var n4 = new BigNumber(20000)
 var n5 = new BigNumber(1*Math.pow(10, 18))
+var p = new BigNumber(809015*Math.pow(10, 17))
+var t = new BigNumber(161803*Math.pow(10, 18))
 
 contract('Crowdsale', function(accounts) {
   // Token Tests
@@ -237,13 +240,25 @@ contract('Crowdsale', function(accounts) {
       })
     })
   })
+  it("can buy up to the presale cap", function() {
+    return inst.weiRaised.call().then(function(raised) {
+      pt = p.minus(raised)
+      return inst.sendTransaction({from: accounts[1], value: pt}).then(function(tx) {
+        return inst.weiRaised.call().then(function(raised) {
+          assert(raised.toString(10), p.toString(10))
+          return token.balanceOf(accounts[1]).then(function(bal) {
+            assert(bal, new BigNumber(20000*1397).plus(pt.mul(1397)))
+          })
+        })
+      })
+    })
+  })
   it("can't buy if presale cap is reached", function() {
     var events = inst.allEvents();
-    return inst.sendTransaction({from: accounts[0], value: 803765*Math.pow(10, 17)}).then(function(res) {
+    return inst.sendTransaction({from: accounts[0], value: 1}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
-        // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth
-        var s = n1.plus(n2).plus(n3).plus(n4)
-        assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount")
+        // assert weiRaised = presale total
+        assert.equal(raised.toString(10), p.toString(10), "presale cap reached purchase did not issue correct amount")
         return token.totalSupply.call().then(function(totalSupply){
           tSupply = totalSupply
           return token.balanceOf(accounts[0])
@@ -251,6 +266,11 @@ contract('Crowdsale', function(accounts) {
           // assert total = 75 eth * 1164 + 150 eth * 1281 + 300 eth * 1339
           var amount = web3.fromWei(purchased.toNumber())
           assert.equal(amount, (75*1164)+(150*1281)+(300*1339), "over cap eth purchase did not issue correct amount")
+          var test = pt
+          test = test.mul(1397)
+          test = test.plus(n1.mul(1164)).plus(n2.mul(1281)).plus(n3.mul(1339)).plus(n4.mul(1397))
+          // assert total tokens = 75 eth * 1164 + 150 eth * 1281 + 300 eth * 1339 + remaining wei * 1397
+          assert.equal(tSupply.toString(10), test.toString(10), "totalSupply incorrect")
         })
       })
     })
@@ -266,8 +286,8 @@ contract('Crowdsale', function(accounts) {
     return inst.setTime(presale, start, end).then(function(){
       return inst.sendTransaction({from: accounts[0], value: 1*Math.pow(10, 18)}).then(function(res) {
         return inst.weiRaised.call().then(function(raised){
-        // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth
-          var s = n1.plus(n2).plus(n3).plus(n4).plus(n5)
+        // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth + presale cap difference
+          var s = n1.plus(n2).plus(n3).plus(n4).plus(n5).plus(pt)
           assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount")
           return token.totalSupply.call().then(function(totalSupply){
             tSupply = totalSupply
@@ -281,12 +301,25 @@ contract('Crowdsale', function(accounts) {
       })
     })
   })
+  it("can buy up to the sale cap", function() {
+    return inst.weiRaised.call().then(function(raised) {
+      tt = t.minus(raised)
+      return inst.sendTransaction({from: accounts[1], value: tt}).then(function(tx) {
+        return inst.weiRaised.call().then(function(raised) {
+          assert(raised.toString(10), t.toString(10))
+          return token.balanceOf(accounts[1]).then(function(bal) {
+            assert(bal, new BigNumber(20000*1397).plus(tt.mul(1164)).plus(pt.mul(1397)))
+          })
+        })
+      })
+    })
+  })
   it("can't buy if sale cap is reached", function() {
-    return inst.sendTransaction({from: accounts[0], value: 161277*Math.pow(10, 18)}).then(function(res) {
+    return inst.sendTransaction({from: accounts[0], value: 1}).then(function(res) {
       return inst.weiRaised.call().then(function(raised){
-        // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth
-        var s = n1.plus(n2).plus(n3).plus(n4).plus(n5)
-        assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount") 
+        // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth + presale cap difference + sale cap
+        var s = n1.plus(n2).plus(n3).plus(n4).plus(n5).plus(pt).plus(tt)
+        assert.equal(raised.toString(10), s.toString(10), "sale cap reached purchase did not issue correct amount") 
         return token.totalSupply.call().then(function(totalSupply){
           tSupply = totalSupply
           return token.balanceOf(accounts[0])
@@ -305,8 +338,8 @@ contract('Crowdsale', function(accounts) {
     return inst.setTime(presale, start, end).then(function() {
       return inst.sendTransaction({from: accounts[0], value: 20000}).then(function(res) {
         return inst.weiRaised.call().then(function(raised) {
-          // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth
-          var s = n1.plus(n2).plus(n3).plus(n4).plus(n5)
+          // assert weiRaised = 20000 + 75 eth + 150 eth + 300 eth + 1 eth + presale cap difference + sale cap
+          var s = n1.plus(n2).plus(n3).plus(n4).plus(n5).plus(pt).plus(tt)
           assert.equal(raised.toString(10), s.toString(10), "presale cap reached purchase did not issue correct amount")         
           return token.balanceOf(accounts[0])
         }).then(function(purchased) {
@@ -332,6 +365,10 @@ contract('Crowdsale', function(accounts) {
     }).then(function(owner) {
       // assert that the token is now owned by master account
       assert.equal(owner, accounts[0], "ownership was not transferred correctly")
+      return token.balanceOf(accounts[0])
+    }).then(function(bal) {
+      // assert that the owner remaining ~40% of tokens were issued in finalization.
+      assert(web3.fromWei(bal.toNumber()), 107705112.5)
     })
   })
 
