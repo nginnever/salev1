@@ -1,4 +1,4 @@
-var BigNumber = require('bignumber.js');
+var BigNumber = require('bignumber.js')
 var Crowdsale = artifacts.require("./TestCrowdsale.sol")
 var Token = artifacts.require("./MatryxToken")
 
@@ -9,18 +9,28 @@ var start
 var end
 var crowdsaleAddy
 
+// token balances
 var a0Balance
 var a1Balance
+// supply 
 var tSupply
 var wieSupply
 var pt
+var tt
 
+// tier one purchase wei
 var n1 = new BigNumber(75*Math.pow(10, 18))
+// tier two purchase wei
 var n2 = new BigNumber(150*Math.pow(10, 18))
+// tier three purchase wei
 var n3 = new BigNumber(300*Math.pow(10, 18))
+// tier whitelistmpurchase wei
 var n4 = new BigNumber(20000)
+// regular sale purchase wei
 var n5 = new BigNumber(1*Math.pow(10, 18))
+// presale wei cap
 var p = new BigNumber(809015*Math.pow(10, 17))
+// sale wei cap
 var t = new BigNumber(161803*Math.pow(10, 18))
 
 contract('Crowdsale', function(accounts) {
@@ -81,11 +91,21 @@ contract('Crowdsale', function(accounts) {
     })
   })
   it("updates the presale whitelist", function() {
+    var watcher = inst.Whitelisted()
     return inst.updateWhitelist(accounts[1], {from: accounts[0]}).then(function(tx) {
+      return watcher.get()
+    }).then(function(e){
+      assert.equal(e.length, 1);
+      assert.isTrue(e[0].args.status)
+      assert.equal(e[0].args.addr, accounts[1])
       return inst.whitelist(accounts[1])
     }).then(function(listed){
       assert.isTrue(listed)
     })
+  })
+  it("test async", async function() {
+    var test = await token.totalSupply.call()
+    console.log(test)
   })
   it("can't buy before presale time", function() {
     presale = new Date().getTime() + 10000

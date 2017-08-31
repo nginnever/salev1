@@ -128,7 +128,6 @@ contract TestCrowdsale is Ownable, Haltable {
   function buyTokens(address beneficiary) stopInEmergency payable {
     require(beneficiary != 0x0);
     require(msg.value != 0);
-    require(!hasEnded());
     
     if(isPresale()) {
       require(validPrePurchase());
@@ -165,10 +164,6 @@ contract TestCrowdsale is Ownable, Haltable {
     tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
 
     token.mint(beneficiary, tokens);
-
-    // Update investor
-    investedAmountOf[msg.sender] = investedAmountOf[msg.sender].add(msg.value);
-    tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
 
     TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 

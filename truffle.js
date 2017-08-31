@@ -1,3 +1,6 @@
+require('babel-register')
+require('babel-polyfill')
+
 var test = true
 var account
 
