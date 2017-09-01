@@ -53,7 +53,6 @@ contract('MatryxToken', function(accounts) {
   it('should fail to mint after call to finishMinting', async function () {
     await token.finishMinting();
     assert.equal(await token.mintingFinished(), true);
-    //await expectThrow(token.mint(accounts[0], 100));
   })
 
   // test upgrades
