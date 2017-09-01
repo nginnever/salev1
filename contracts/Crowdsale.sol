@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.13;
 
 import './MatryxToken.sol';
 import './math/SafeMath.sol';
@@ -198,8 +198,8 @@ contract Crowdsale is Ownable, Haltable {
   }
 
   /**
-   * @dev Finalization logic. We take the expected sale cap of 188495559
-   * and find the difference from the actual minted tokens.
+   * @dev Finalization logic. We take the expected sale cap of 314159265
+   * ether and find the difference from the actual minted tokens.
    * The remaining balance and 40% of total supply are minted 
    * to the Matryx team multisig wallet.
    */
