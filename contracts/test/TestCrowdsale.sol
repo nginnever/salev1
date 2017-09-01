@@ -1,9 +1,9 @@
 pragma solidity ^0.4.11;
 
-import './MatryxToken.sol';
-import './math/SafeMath.sol';
-import './Haltable.sol';
-import './ownership/Ownable.sol';
+import '../MatryxToken.sol';
+import '../math/SafeMath.sol';
+import '../Haltable.sol';
+import '../ownership/Ownable.sol';
 
 /**
  * @title TestCrowdsale
