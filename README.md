@@ -29,6 +29,12 @@ Set unix epoch for start and end time
 
 ## Test
 
+run via npm script
+
+`npm run test`
+
+or
+
 install testrpc
 
 ```
@@ -47,9 +53,4 @@ set test bool to true in /migrations/2_deploy_contracts.js
 run truffle tests
 
 ```truffle test```
-
-## TODO
-
-- Customer serverside UUID and database?
-- upgrade path
 
