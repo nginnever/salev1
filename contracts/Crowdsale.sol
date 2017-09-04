@@ -106,7 +106,7 @@ contract Crowdsale is Ownable, Haltable {
   }
 
   // fallback function can't accept ether
-  function () payable {
+  function () {
     throw;
   }
 
@@ -172,9 +172,9 @@ contract Crowdsale is Ownable, Haltable {
     weiRaised = weiRaised.add(weiAmount);
 
     // Update purchaser
+    if(purchasedAmountOf[msg.sender] == 0) purchaserCount++;
     purchasedAmountOf[msg.sender] = purchasedAmountOf[msg.sender].add(msg.value);
     tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
-    if(purchasedAmountOf[msg.sender] == 0) purchaserCount++;
 
     token.mint(beneficiary, tokens);
 
