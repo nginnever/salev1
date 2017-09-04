@@ -111,7 +111,7 @@ contract Crowdsale is Ownable, Haltable {
   }
 
   // default buy function
-  function buy() public payable {
+  function buy() public {
     buyTokens(msg.sender);
   }
   
