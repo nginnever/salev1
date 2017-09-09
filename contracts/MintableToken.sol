@@ -1,7 +1,8 @@
-pragma solidity ^0.4.13;
+pragma solidity ^0.4.15;
 
 
 import './ReleasableToken.sol';
+import './UpgradeableToken.sol';
 
 
 /**
@@ -11,7 +12,7 @@ import './ReleasableToken.sol';
  * Based on code by TokenMarketNet: https://github.com/TokenMarketNet/ico/blob/master/contracts/MintableToken.sol
  */
 
-contract MintableToken is ReleasableToken {
+contract MintableToken is UpgradeableToken, ReleasableToken {
   event Mint(address indexed to, uint256 amount);
   event MintFinished();
 

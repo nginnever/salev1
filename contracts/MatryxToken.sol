@@ -1,4 +1,4 @@
-pragma solidity ^0.4.13;
+pragma solidity ^0.4.15;
 
 import "./MintableToken.sol";
 import "./UpgradeableToken.sol";
@@ -6,7 +6,7 @@ import "./UpgradeableToken.sol";
 /**
  * Matryx Ethereum token.
  */
-contract MatryxToken is MintableToken, UpgradeableToken{
+contract MatryxToken is MintableToken{
 
   string public name = "MatryxToken";
   string public symbol = "MTX";

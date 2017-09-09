@@ -17,7 +17,7 @@ module.exports = function(deployer) {
   } else {
     //deployer.deploy(Crowdsale, 1504052905, 1504056025, 1504059625, "0x0040077926585455c40ceA126B37bED392aCa8C2")
 	MatryxToken.new().then(function(res) {
-	  deployer.deploy(Crowdsale, 1504062025, 1504062925, 1504063825, "0x0040077926585455c40ceA126B37bED392aCa8C2", res.address)
+	  deployer.deploy(Crowdsale, 1504669503, 1504670403, 1504671303, "0x0040077926585455c40ceA126B37bED392aCa8C2", res.address)
 	})
   }
 };

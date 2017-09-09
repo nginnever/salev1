@@ -1,4 +1,4 @@
-pragma solidity ^0.4.13;
+pragma solidity ^0.4.15;
 
 import './MatryxToken.sol';
 import './math/SafeMath.sol';
@@ -121,68 +121,47 @@ contract Crowdsale is Ownable, Haltable {
     require(beneficiary != 0x0);
     require(msg.value != 0);
     
-    if(isPresale()) {
+    uint256 weiAmount = msg.value;
+    uint256 tokens = calcTokens(isPresale(), weiAmount);
+    // update state
+    weiRaised = weiRaised.add(weiAmount);
+
+    // Update purchaser
+    if(purchasedAmountOf[msg.sender] == 0) purchaserCount++;
+    purchasedAmountOf[msg.sender] = purchasedAmountOf[msg.sender].add(msg.value);
+    tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
+
+    token.mint(beneficiary, tokens);
+
+    TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
+
+    forwardFunds();
+  }
+
+  function calcTokens(bool _presale, uint256 weiAmount) internal returns (uint256){
+    uint256 tokens = 0;
+    if(_presale){
       require(validPrePurchase());
-      buyPresale(beneficiary);
+      // calculate discount
+      if(whitelist[msg.sender]) {
+        tokens = weiAmount.mul(whitelistRate);
+      } else if(weiAmount < tierTwoPurchase) {
+        // Not whitelisted so they must have sent over 75 ether 
+        tokens = weiAmount.mul(baseRate);
+      } else if(weiAmount < tierThreePurchase) {
+        // Over 150 ether was sent
+        tokens = weiAmount.mul(tierTwoRate);
+      } else {
+        // Over 300 ether was sent
+        tokens = weiAmount.mul(tierThreeRate);
+      }
     } else {
       require(validPurchase());
-      buySale(beneficiary);
-    }
-  }
-
-  function buyPresale(address beneficiary) internal {
-    uint256 weiAmount = msg.value;
-    uint256 tokens = 0;
-    
-    // calculate discount
-    if(whitelist[msg.sender]) {
-      tokens = weiAmount.mul(whitelistRate);
-    } else if(weiAmount < tierTwoPurchase) {
-      // Not whitelisted so they must have sent over 75 ether 
       tokens = weiAmount.mul(baseRate);
-    } else if(weiAmount < tierThreePurchase) {
-      // Over 150 ether was sent
-      tokens = weiAmount.mul(tierTwoRate);
-    } else {
-      // Over 300 ether was sent
-      tokens = weiAmount.mul(tierThreeRate);
     }
-
-    // update state
-    weiRaised = weiRaised.add(weiAmount);
-
-    // Update purchaser
-    if(purchasedAmountOf[msg.sender] == 0) purchaserCount++;
-    purchasedAmountOf[msg.sender] = purchasedAmountOf[msg.sender].add(msg.value);
-    tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
-
-    token.mint(beneficiary, tokens);
-
-    TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
-
-    forwardFunds();
+    return tokens;
   }
 
-  function buySale(address beneficiary) internal {
-    uint256 weiAmount = msg.value;
-
-    // calculate token amount to be created
-    uint256 tokens = weiAmount.mul(baseRate);
-
-    // update state
-    weiRaised = weiRaised.add(weiAmount);
-
-    // Update purchaser
-    if(purchasedAmountOf[msg.sender] == 0) purchaserCount++;
-    purchasedAmountOf[msg.sender] = purchasedAmountOf[msg.sender].add(msg.value);
-    tokenAmountOf[msg.sender] = tokenAmountOf[msg.sender].add(tokens);
-
-    token.mint(beneficiary, tokens);
-
-    TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
-
-    forwardFunds();
-  }
 
   /**
    * @dev Must be called after crowdsale ends, to do some extra finalization
